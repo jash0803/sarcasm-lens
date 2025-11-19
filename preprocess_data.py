@@ -1,6 +1,23 @@
 import pandas as pd
 import re
 import csv
+import string
+import nltk
+from nltk.corpus import stopwords
+
+# Download stopwords if not already downloaded
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt', quiet=True)
+
+try:
+    stopwords.words('english')
+except LookupError:
+    nltk.download('stopwords', quiet=True)
+
+# Get English stop words
+STOP_WORDS = set(stopwords.words('english'))
 
 def split_camel_case(text):
     """Split camelCase hashtags into separate words.
@@ -32,6 +49,14 @@ def preprocess_text(text):
     
     # Remove URLs
     text = re.sub(r'http\S+|www\.\S+', '', text)
+    
+    # Remove punctuation
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    
+    # Remove stop words
+    words = text.split()
+    words = [word for word in words if word.lower() not in STOP_WORDS]
+    text = ' '.join(words)
     
     # Remove extra whitespace
     text = re.sub(r'\s+', ' ', text)

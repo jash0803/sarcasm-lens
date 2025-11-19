@@ -8,6 +8,7 @@ import pandas as pd
 import requests
 import json
 import os
+import time
 from pathlib import Path
 from typing import Set, List, Dict
 
@@ -18,6 +19,9 @@ OUTPUT_CSV = "fetched_sarcastic_tweets.csv"
 API_RESPONSES_DIR = "api_responses"
 BATCH_SIZE = 50
 API_BASE_URL = "https://api.x.com/2/tweets"
+DELAY_BETWEEN_REQUESTS = 2  # seconds
+MAX_RETRIES = 3
+RATE_LIMIT_WAIT = 900  # 15 minutes in seconds (X API rate limit window)
 
 def load_already_fetched_tweet_ids(output_csv: str) -> Set[str]:
     """Load tweet IDs that have already been fetched."""
@@ -37,22 +41,63 @@ def get_sarcastic_tweet_ids(input_csv: str) -> List[str]:
     sarcastic_df = df[df['sarcastic'] == 1]
     return sarcastic_df['tweet_id'].astype(str).tolist()
 
-def fetch_tweet_by_id(tweet_id: str, bearer_token: str) -> Dict:
-    """Fetch a single tweet by ID using X API."""
+def fetch_tweet_by_id(tweet_id: str, bearer_token: str, max_retries: int = MAX_RETRIES) -> Dict:
+    """Fetch a single tweet by ID using X API with retry logic for rate limits."""
     url = f"{API_BASE_URL}/{tweet_id}"
     headers = {
         "Authorization": f"Bearer {bearer_token}"
     }
     
-    try:
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching tweet {tweet_id}: {e}")
-        if hasattr(e.response, 'text'):
-            print(f"Response: {e.response.text}")
-        return None
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            
+            # Check for rate limit (429)
+            if response.status_code == 429:
+                # Try to get rate limit reset time from headers
+                reset_time = response.headers.get('x-rate-limit-reset')
+                if reset_time:
+                    reset_timestamp = int(reset_time)
+                    current_time = int(time.time())
+                    wait_time = max(reset_timestamp - current_time, RATE_LIMIT_WAIT)
+                    print(f"\n⚠ Rate limit hit! Waiting {wait_time // 60} minutes...")
+                    time.sleep(wait_time)
+                else:
+                    # If no reset time, wait the default rate limit window
+                    print(f"\n⚠ Rate limit hit! Waiting {RATE_LIMIT_WAIT // 60} minutes...")
+                    time.sleep(RATE_LIMIT_WAIT)
+                
+                # Retry after waiting
+                if attempt < max_retries - 1:
+                    continue
+                else:
+                    return None
+            
+            response.raise_for_status()
+            return response.json()
+            
+        except requests.exceptions.RequestException as e:
+            if hasattr(e, 'response') and e.response is not None:
+                if e.response.status_code == 429:
+                    # Already handled above, but catch it here too
+                    if attempt < max_retries - 1:
+                        continue
+                else:
+                    print(f"\nError fetching tweet {tweet_id}: {e}")
+                    if hasattr(e.response, 'text'):
+                        print(f"Response: {e.response.text}")
+            else:
+                print(f"\nError fetching tweet {tweet_id}: {e}")
+            
+            # For non-429 errors, wait with exponential backoff
+            if attempt < max_retries - 1:
+                wait_time = (2 ** attempt) * 5  # 5s, 10s, 20s
+                print(f"Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+            else:
+                return None
+    
+    return None
 
 def save_api_response(tweet_id: str, response_data: Dict, output_dir: str):
     """Save API response to a JSON file."""
@@ -124,6 +169,10 @@ def main():
         else:
             print("✗ Failed")
             failed += 1
+        
+        # Add delay between requests (except after the last one)
+        if i < len(batch):
+            time.sleep(DELAY_BETWEEN_REQUESTS)
     
     print(f"\n=== Summary ===")
     print(f"Successful: {successful}")

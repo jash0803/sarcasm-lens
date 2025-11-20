@@ -53,7 +53,7 @@ def train_random_forest(X_train, y_train, X_test, y_test, n_estimators=100, max_
 
 def main():
     # File paths
-    preprocessed_file = "datasets/sahil swami dataset/sarcasm_dataset_processed.csv"
+    preprocessed_file = "datasets/combined_dataset.csv"
     
     # Load data
     df = load_and_prepare_data(preprocessed_file)

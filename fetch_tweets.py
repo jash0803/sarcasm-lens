@@ -15,8 +15,8 @@ from typing import Set, List, Dict
 # Configuration
 BEARER_TOKEN = "YOUR_BEARER_TOKEN_HERE"  # Change this before running
 INPUT_CSV = "datasets/akshita agrawall/Sarcasm_dataset.csv"
-OUTPUT_CSV = "fetched_sarcastic_tweets.csv"
-API_RESPONSES_DIR = "api_responses"
+OUTPUT_CSV = "datasets/akshita agrawall/fetched_sarcastic_tweets.csv"
+API_RESPONSES_DIR = "datasets/akshita agrawall/api_responses"
 BATCH_SIZE = 50
 API_BASE_URL = "https://api.x.com/2/tweets"
 DELAY_BETWEEN_REQUESTS = 2  # seconds

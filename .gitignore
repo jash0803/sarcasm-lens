@@ -1,6 +1,6 @@
 # API responses and fetched data
 api_responses/
-fetched_sarcastic_tweets.csv
+datasets/
 
 # Python
 __pycache__/

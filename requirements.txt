@@ -8,4 +8,5 @@ requests>=2.28.0
 fasttext>=0.9.2
 sentence-transformers
 transformers
+fire>=0.6.0
 

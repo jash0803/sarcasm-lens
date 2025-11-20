@@ -168,7 +168,7 @@ def evaluate_model(y_test, y_pred, model_name):
 
 def main():
     # File paths
-    preprocessed_file = "datasets/sahil swami/sarcasm_dataset_preprocessed.csv"
+    preprocessed_file = "datasets/sahil swami/sarcasm_dataset_processed.csv"
     
     # FastText parameters
     fasttext_dim = 100

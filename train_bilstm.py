@@ -82,7 +82,7 @@ def compute_max_len_from_texts(tokenizer: Tokenizer, texts: np.ndarray, percenti
 
 def main():
 	# Paths
-	preprocessed_file = "datasets/sahil swami/sarcasm_dataset_preprocessed.csv"
+	preprocessed_file = "datasets/sahil swami/sarcasm_dataset_processed.csv"
 	model_output_path = "bilstm_model.keras"
 	tokenizer_output_path = "tokenizer_bilstm.pkl"
 	config_output_path = "bilstm_config.json"

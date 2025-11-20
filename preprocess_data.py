@@ -4,6 +4,7 @@ import csv
 import string
 import nltk
 from nltk.corpus import stopwords
+import fire
 
 # Download stopwords if not already downloaded
 try:
@@ -32,7 +33,7 @@ def preprocess_text(text):
     if pd.isna(text):
         return ""
     
-    text = str(text)
+    text = str(text).lower()
     
     # Remove @ mentions (e.g., @username, @TripleTalaq)
     text = re.sub(r'@\w+', '', text)
@@ -66,44 +67,60 @@ def preprocess_text(text):
     
     return text
 
-def main():
-    # Read the original dataset
-    input_file = "datasets/sahil swami dataset/sarcasm_dataset.csv"
-    output_file = "datasets/sahil swami dataset/sarcasm_dataset_preprocessed.csv"
-    
-    print("Loading dataset...")
+def main(
+    input_file: str = "datasets/sahil swami/sarcasm_dataset.csv",
+    output_file: str = "datasets/sahil swami/sarcasm_dataset_processed.csv",
+    text_column: str = "text"
+):
+    """
+    Preprocess a dataset and write the cleaned text back to CSV.
+
+    Args:
+        input_file: Path to the input CSV file.
+        output_file: Path where the cleaned CSV should be stored.
+        text_column: Name of the column containing raw text.
+    """
+    print(f"Loading dataset from {input_file}...")
     df = pd.read_csv(input_file)
-    
+
+    if text_column not in df.columns:
+        raise ValueError(
+            f"Column '{text_column}' not found in dataset columns: {df.columns.tolist()}"
+        )
+
     print(f"Original dataset shape: {df.shape}")
     print(f"Original columns: {df.columns.tolist()}")
-    
+
+    # Capture sample before preprocessing for reference
+    original_sample = df[text_column].head(3).tolist()
+
     # Preprocess the text column
-    print("Preprocessing text...")
-    df['text_preprocessed'] = df['text'].apply(preprocess_text)
-    
-    # Create a new dataframe with preprocessed text
-    df_preprocessed = df[['tweet_id', 'label', 'text_preprocessed']].copy()
-    df_preprocessed.rename(columns={'text_preprocessed': 'text'}, inplace=True)
-    
+    print(f"Preprocessing text column '{text_column}'...")
+    df[text_column] = df[text_column].apply(preprocess_text)
+
     # Remove rows with empty text after preprocessing
-    df_preprocessed = df_preprocessed[df_preprocessed['text'].str.strip() != '']
-    
+    non_empty_mask = df[text_column].str.strip() != ""
+    df_preprocessed = df[non_empty_mask].copy()
+
     print(f"Preprocessed dataset shape: {df_preprocessed.shape}")
-    
+
     # Save preprocessed dataset
     print(f"Saving preprocessed dataset to {output_file}...")
     df_preprocessed.to_csv(output_file, index=False, encoding='utf-8')
-    
+
     print("Preprocessing complete!")
-    print(f"\nSample of original text:")
-    print(df['text'].head(3).tolist())
-    print(f"\nSample of preprocessed text:")
-    print(df_preprocessed['text'].head(3).tolist())
-    
-    # Show label distribution
-    print(f"\nLabel distribution:")
-    print(df_preprocessed['label'].value_counts())
+    print("\nSample of original text:")
+    print(original_sample)
+    print("\nSample of preprocessed text:")
+    print(df_preprocessed[text_column].head(3).tolist())
+
+    # Show label distribution if available
+    if "label" in df_preprocessed.columns:
+        print("\nLabel distribution:")
+        print(df_preprocessed["label"].value_counts())
+    else:
+        print("\nLabel column not found; skipping label distribution.")
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)
 

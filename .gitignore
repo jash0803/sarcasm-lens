@@ -1,6 +1,18 @@
-# API responses and fetched data
+# API responses and datasets
 api_responses/
 datasets/
+
+# Model files
+*.bin
+*.keras
+*.pkl
+*.h5
+*.ckpt
+*.json
+*.txt
+*.csv
+*.npy
+*.npz
 
 # Python
 __pycache__/

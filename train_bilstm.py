@@ -53,7 +53,7 @@ def build_bilstm_model(
 ) -> tf.keras.Model:
 	"""Construct a simple Bidirectional LSTM model for binary classification."""
 	model = Sequential([
-		Embedding(input_dim=vocab_size, output_dim=embedding_dim, input_length=max_len),
+		Embedding(input_dim=vocab_size, output_dim=embedding_dim),
 		Bidirectional(LSTM(lstm_units, return_sequences=True)),
 		GlobalMaxPooling1D(),
 		Dropout(dropout_rate),
@@ -82,7 +82,7 @@ def compute_max_len_from_texts(tokenizer: Tokenizer, texts: np.ndarray, percenti
 
 def main():
 	# Paths
-	preprocessed_file = "datasets/sahil swami dataset/sarcasm_dataset_preprocessed.csv"
+	preprocessed_file = "datasets/sahil swami/sarcasm_dataset_preprocessed.csv"
 	model_output_path = "bilstm_model.keras"
 	tokenizer_output_path = "tokenizer_bilstm.pkl"
 	config_output_path = "bilstm_config.json"

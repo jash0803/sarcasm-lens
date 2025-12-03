@@ -77,56 +77,46 @@ def compute_max_len_from_texts(tokenizer: Tokenizer, texts: np.ndarray, percenti
 	if not lengths:
 		return 20
 	max_len = int(np.percentile(lengths, percentile))
-	return max(20, min(max_len, 200))  # keep within a reasonable range
+	return max(20, min(max_len, 200))
 
 
 def main():
-	# Paths
 	preprocessed_file = "datasets/combined_dataset.csv"
 	model_output_path = "bilstm_model.keras"
 	tokenizer_output_path = "tokenizer_bilstm.pkl"
 	config_output_path = "bilstm_config.json"
 
-	# Hyperparameters
-	vocab_size = 20000  # top-N words to keep
+	vocab_size = 20000
 	oov_token = "<OOV>"
 	batch_size = 64
 	epochs = 10
 	validation_split = 0.1
 
-	# Load data
 	df = load_dataset(preprocessed_file)
 	X = df['text'].astype(str).values
 	y = df['label'].astype(int).values
 
-	# Split
 	X_train_text, X_test_text, y_train, y_test = prepare_splits(X, y)
 
-	# Tokenize
 	print("\nFitting tokenizer...")
 	tokenizer = Tokenizer(num_words=vocab_size, oov_token=oov_token)
 	tokenizer.fit_on_texts(X_train_text)
 
-	# Effective vocab size is min(vocab_size, actual_vocab + 1 for OOV)
 	actual_vocab_size = min(vocab_size, len(tokenizer.word_index) + 1)
 
-	# Determine reasonable max_len from train distribution
 	max_len = compute_max_len_from_texts(tokenizer, X_train_text, percentile=95.0)
 	print(f"Using max_len={max_len}, vocab_size={actual_vocab_size}")
 
-	# Convert to padded sequences
 	print("Tokenizing and padding sequences...")
 	X_train_seq = tokenizer.texts_to_sequences(X_train_text)
 	X_test_seq = tokenizer.texts_to_sequences(X_test_text)
 	X_train_pad = pad_sequences(X_train_seq, maxlen=max_len, padding='post', truncating='post')
 	X_test_pad = pad_sequences(X_test_seq, maxlen=max_len, padding='post', truncating='post')
 
-	# Build model
 	print("\nBuilding Bidirectional LSTM model...")
 	model = build_bilstm_model(actual_vocab_size, max_len)
 	model.summary(print_fn=lambda x: print(x))
 
-	# Callbacks
 	early_stop = EarlyStopping(
 		monitor='val_loss',
 		patience=2,
@@ -139,7 +129,6 @@ def main():
 		save_weights_only=False
 	)
 
-	# Train
 	print("\nTraining...")
 	history = model.fit(
 		X_train_pad,
@@ -151,7 +140,6 @@ def main():
 		verbose=1
 	)
 
-	# Evaluate
 	print("\nEvaluating on test set...")
 	test_probs = model.predict(X_test_pad, batch_size=batch_size, verbose=0).ravel()
 	y_pred = (test_probs >= 0.5).astype(int)
@@ -180,9 +168,7 @@ def main():
 	print(f"False Negatives: {cm[1][0]}")
 	print(f"True Positives: {cm[1][1]}")
 
-	# Save artifacts
 	print("\nSaving model and tokenizer...")
-	# Model already saved via checkpoint; ensure existence or save final
 	if not os.path.exists(model_output_path):
 		model.save(model_output_path)
 	joblib.dump(tokenizer, tokenizer_output_path)

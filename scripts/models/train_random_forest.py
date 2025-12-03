@@ -22,23 +22,18 @@ def train_random_forest(X_train, y_train, X_test, y_test, n_estimators=100, max_
     print("\nTraining Random Forest classifier...")
     print(f"Parameters: n_estimators={n_estimators}, max_depth={max_depth}")
     
-    # Initialize Random Forest
     rf_classifier = RandomForestClassifier(
         n_estimators=n_estimators,
         max_depth=max_depth,
         random_state=random_state,
-        n_jobs=-1,  # Use all available cores
-        class_weight='balanced'  # Handle class imbalance
+        n_jobs=-1,
+        class_weight='balanced'
     )
     
-    # Train the model
     rf_classifier.fit(X_train, y_train)
     
-    # Make predictions
     y_train_pred = rf_classifier.predict(X_train)
     y_test_pred = rf_classifier.predict(X_test)
-    
-    # Calculate metrics
     train_accuracy = accuracy_score(y_train, y_train_pred)
     test_accuracy = accuracy_score(y_test, y_test_pred)
     train_f1 = f1_score(y_train, y_train_pred, average='weighted')
@@ -56,36 +51,31 @@ def train_random_forest(X_train, y_train, X_test, y_test, n_estimators=100, max_
     return rf_classifier, y_test_pred
 
 def main():
-    # File paths
     preprocessed_file = "datasets/combined_dataset.csv"
     
-    # Load data
     df = load_and_prepare_data(preprocessed_file)
     
-    # Prepare features and labels
     X = df['text'].values
     y = df['label'].values
     
-    # Split the data
     print("\nSplitting data into train and test sets...")
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, 
         test_size=0.2, 
         random_state=42, 
-        stratify=y  # Maintain class distribution
+        stratify=y
     )
     
     print(f"Training set size: {len(X_train)}")
     print(f"Test set size: {len(X_test)}")
     
-    # Vectorize text using TF-IDF
     print("\nVectorizing text using TF-IDF...")
     vectorizer = TfidfVectorizer(
-        max_features=5000,  # Limit vocabulary size
-        ngram_range=(1, 2),  # Use unigrams and bigrams
-        min_df=2,  # Ignore terms that appear in less than 2 documents
-        max_df=0.95,  # Ignore terms that appear in more than 95% of documents
-        stop_words=None  # Keep stop words as they might be important for sarcasm
+        max_features=5000,
+        ngram_range=(1, 2),
+        min_df=2,
+        max_df=0.95,
+        stop_words=None
     )
     
     X_train_tfidf = vectorizer.fit_transform(X_train)
@@ -94,7 +84,6 @@ def main():
     print(f"TF-IDF matrix shape (train): {X_train_tfidf.shape}")
     print(f"TF-IDF matrix shape (test): {X_test_tfidf.shape}")
     
-    # Train Random Forest
     rf_model, y_pred = train_random_forest(
         X_train_tfidf, y_train, 
         X_test_tfidf, y_test,
@@ -103,7 +92,6 @@ def main():
         random_state=42
     )
     
-    # Detailed evaluation
     print("\n" + "="*50)
     print("Detailed Classification Report:")
     print("="*50)
@@ -119,7 +107,6 @@ def main():
     print(f"False Negatives: {cm[1][0]}")
     print(f"True Positives: {cm[1][1]}")
     
-    # Feature importance (top features)
     print("\n" + "="*50)
     print("Top 20 Most Important Features:")
     print("="*50)
@@ -130,7 +117,6 @@ def main():
     for i, idx in enumerate(indices, 1):
         print(f"{i}. {feature_names[idx]}: {importances[idx]:.4f}")
     
-    # Save the model and vectorizer
     print("\n" + "="*50)
     print("Saving model and vectorizer...")
     print("="*50)

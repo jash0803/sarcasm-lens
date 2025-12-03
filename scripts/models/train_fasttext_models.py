@@ -24,8 +24,7 @@ def prepare_fasttext_data(texts, output_file):
     print(f"\nPreparing FastText training data...")
     with open(output_file, 'w', encoding='utf-8') as f:
         for text in texts:
-            # FastText expects one sentence per line, preprocessed
-            cleaned_text = ' '.join(str(text).split())  # Normalize whitespace
+            cleaned_text = ' '.join(str(text).split())
             f.write(cleaned_text + '\n')
     print(f"FastText training data saved to {output_file}")
 
@@ -34,10 +33,9 @@ def train_fasttext_model(training_file, model_dim=100, min_count=1, epoch=10):
     print(f"\nTraining FastText model...")
     print(f"Parameters: dim={model_dim}, min_count={min_count}, epoch={epoch}")
     
-    # Train FastText model (unsupervised, skipgram)
     model = fasttext.train_unsupervised(
         training_file,
-        model='skipgram',  # or 'cbow'
+        model='skipgram',
         dim=model_dim,
         minCount=min_count,
         epoch=epoch,
@@ -60,10 +58,8 @@ def get_sentence_embedding(model, text, dim=100):
             word_vectors.append(model.get_word_vector(word))
     
     if len(word_vectors) == 0:
-        # Return zero vector if no words found
         return np.zeros(dim)
     
-    # Average word vectors to get sentence embedding
     return np.mean(word_vectors, axis=0)
 
 def extract_embeddings(model, texts, dim=100):
@@ -86,23 +82,18 @@ def train_random_forest(X_train, y_train, X_test, y_test, n_estimators=100, max_
     print("\nTraining Random Forest classifier with FastText embeddings...")
     print(f"Parameters: n_estimators={n_estimators}, max_depth={max_depth}")
     
-    # Initialize Random Forest
     rf_classifier = RandomForestClassifier(
         n_estimators=n_estimators,
         max_depth=max_depth,
         random_state=random_state,
-        n_jobs=-1,  # Use all available cores
-        class_weight='balanced'  # Handle class imbalance
+        n_jobs=-1,
+        class_weight='balanced'
     )
     
-    # Train the model
     rf_classifier.fit(X_train, y_train)
     
-    # Make predictions
     y_train_pred = rf_classifier.predict(X_train)
     y_test_pred = rf_classifier.predict(X_test)
-    
-    # Calculate metrics
     train_accuracy = accuracy_score(y_train, y_train_pred)
     test_accuracy = accuracy_score(y_test, y_test_pred)
     train_f1 = f1_score(y_train, y_train_pred, average='weighted')
@@ -124,23 +115,18 @@ def train_svm(X_train, y_train, X_test, y_test, C=1.0, random_state=42, max_iter
     print("\nTraining Linear SVM classifier with FastText embeddings...")
     print(f"Parameters: C={C}, max_iter={max_iter}")
     
-    # Initialize Linear SVM
     svm_classifier = LinearSVC(
         C=C,
         random_state=random_state,
         max_iter=max_iter,
-        class_weight='balanced',  # Handle class imbalance
-        dual=False  # Use primal formulation for large datasets
+        class_weight='balanced',
+        dual=False
     )
     
-    # Train the model
     svm_classifier.fit(X_train, y_train)
     
-    # Make predictions
     y_train_pred = svm_classifier.predict(X_train)
     y_test_pred = svm_classifier.predict(X_test)
-    
-    # Calculate metrics
     train_accuracy = accuracy_score(y_train, y_train_pred)
     test_accuracy = accuracy_score(y_test, y_test_pred)
     train_f1 = f1_score(y_train, y_train_pred, average='weighted')
@@ -175,45 +161,37 @@ def evaluate_model(y_test, y_pred, model_name):
     print(f"True Positives: {cm[1][1]}")
 
 def main():
-    # File paths
     preprocessed_file = "datasets/combined_dataset.csv"
     
-    # FastText parameters
     fasttext_dim = 100
     fasttext_min_count = 1
     fasttext_epoch = 10
     
-    # Load data
     df = load_and_prepare_data(preprocessed_file)
     
-    # Prepare features and labels
     X = df['text'].values
     y = df['label'].values
     
-    # Split the data
     print("\nSplitting data into train and test sets...")
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, 
         test_size=0.2, 
         random_state=42, 
-        stratify=y  # Maintain class distribution
+        stratify=y
     )
     
     print(f"Training set size: {len(X_train)}")
     print(f"Test set size: {len(X_test)}")
     
-    # Prepare FastText training data (use all data for better embeddings)
     print("\n" + "="*50)
     print("Step 1: Training FastText Model")
     print("="*50)
     
-    # Create temporary file for FastText training
     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt', encoding='utf-8') as tmp_file:
         fasttext_training_file = tmp_file.name
         prepare_fasttext_data(X, fasttext_training_file)
     
     try:
-        # Train FastText model
         fasttext_model = train_fasttext_model(
             fasttext_training_file,
             model_dim=fasttext_dim,
@@ -221,7 +199,6 @@ def main():
             epoch=fasttext_epoch
         )
         
-        # Extract embeddings for train and test sets
         print("\n" + "="*50)
         print("Step 2: Extracting FastText Embeddings")
         print("="*50)
@@ -232,7 +209,6 @@ def main():
         print(f"\nTrain embeddings shape: {X_train_embeddings.shape}")
         print(f"Test embeddings shape: {X_test_embeddings.shape}")
         
-        # Train Random Forest with FastText embeddings
         print("\n" + "="*50)
         print("Step 3: Training Random Forest with FastText Embeddings")
         print("="*50)
@@ -247,7 +223,6 @@ def main():
         
         evaluate_model(y_test, rf_y_pred, "Random Forest")
         
-        # Train SVM with FastText embeddings
         print("\n" + "="*50)
         print("Step 4: Training SVM with FastText Embeddings")
         print("="*50)
@@ -262,28 +237,23 @@ def main():
         
         evaluate_model(y_test, svm_y_pred, "SVM")
         
-        # Save models
         print("\n" + "="*50)
         print("Saving models...")
         print("="*50)
         
-        # Save FastText model
         fasttext_model_path = 'fasttext_model.bin'
         fasttext_model.save_model(fasttext_model_path)
         print(f"FastText model saved as '{fasttext_model_path}'")
         
-        # Save Random Forest model
         joblib.dump(rf_model, 'random_forest_fasttext_model.pkl')
         print("Random Forest model saved as 'random_forest_fasttext_model.pkl'")
         
-        # Save SVM model
         joblib.dump(svm_model, 'svm_fasttext_model.pkl')
         print("SVM model saved as 'svm_fasttext_model.pkl'")
         
         print("\nTraining complete!")
         
     finally:
-        # Clean up temporary file
         if os.path.exists(fasttext_training_file):
             os.remove(fasttext_training_file)
             print(f"\nCleaned up temporary file: {fasttext_training_file}")

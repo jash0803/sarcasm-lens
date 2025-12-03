@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from typing import Tuple
 
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 
 import tensorflow as tf
@@ -158,8 +158,12 @@ def main():
 
 	acc = accuracy_score(y_test, y_pred)
 	f1 = f1_score(y_test, y_pred, average='weighted')
+	precision = precision_score(y_test, y_pred, average='weighted')
+	recall = recall_score(y_test, y_pred, average='weighted')
 	print(f"\nTest Accuracy: {acc:.4f}")
 	print(f"Test F1 (weighted): {f1:.4f}")
+	print(f"Test Precision: {precision:.4f}")
+	print(f"Test Recall: {recall:.4f}")
 
 	print("\n" + "="*50)
 	print("Detailed Classification Report:")

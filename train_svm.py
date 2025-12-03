@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score, precision_score, recall_score
 import joblib
 import re
 
@@ -43,11 +43,15 @@ def train_svm(X_train, y_train, X_test, y_test, C=1.0, random_state=42, max_iter
     test_accuracy = accuracy_score(y_test, y_test_pred)
     train_f1 = f1_score(y_train, y_train_pred, average='weighted')
     test_f1 = f1_score(y_test, y_test_pred, average='weighted')
+    test_precision = precision_score(y_test, y_test_pred, average='weighted')
+    test_recall = recall_score(y_test, y_test_pred, average='weighted')
     
     print(f"\nTraining Accuracy: {train_accuracy:.4f}")
     print(f"Test Accuracy: {test_accuracy:.4f}")
     print(f"Training F1 Score: {train_f1:.4f}")
     print(f"Test F1 Score: {test_f1:.4f}")
+    print(f"Test Precision: {test_precision:.4f}")
+    print(f"Test Recall: {test_recall:.4f}")
     
     return svm_classifier, y_test_pred
 

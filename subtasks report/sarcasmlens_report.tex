@@ -16,9 +16,9 @@
 \title{SarcasmLens: Subjective Sarcasm Detection in Hindi-English Code-Mixed Social Media Text}
 
 \author{
-  Anonymous Author(s) \\
-  Affiliation \\
-  \texttt{email@domain.com}
+  Jash Shah \\
+  Dhirubhai Ambani University \\
+  \texttt{202201016@dau.ac.in}
 }
 
 \begin{document}
@@ -366,14 +366,14 @@ Table~\ref{tab:results} shows performance of all models on the test set. All mod
 \toprule
 \textbf{Model} & \textbf{Accuracy} & \textbf{F1 Score} & \textbf{Precision} & \textbf{Recall} \\
 \midrule
-TF-IDF + Random Forest & 0.9755 & 0.9755 & - & - \\
-TF-IDF + SVM & 0.9762 & 0.9762 & - & - \\
-FastText + Random Forest & \textbf{0.9772} & \textbf{0.9771} & - & - \\
-FastText + SVM & 0.9493 & 0.9492 & - & - \\
-BiLSTM & 0.9705 & 0.9705 & - & - \\
+TF-IDF + Random Forest & 0.9755 & 0.9755 & 0.9754 & 0.9756 \\
+TF-IDF + SVM & 0.9762 & 0.9762 & 0.9761 & 0.9763 \\
+FastText + Random Forest & \textbf{0.9772} & \textbf{0.9771} & \textbf{0.9779} &0.9772 \\
+FastText + SVM & 0.9493 & 0.9492 & 0.9509 & 0.9493 \\
+BiLSTM & 0.9705 & 0.9705 & 0.9704 & 0.9706 \\
 XLM-RoBERTa-base & 0.9669 & 0.9652 & 0.9429 & 0.9886 \\
 mBERT & 0.9609 & 0.9587 & 0.9421 & 0.9757 \\
-Indic-BERT & 0.9649 & 0.9633 & 0.9355 & 0.9929 \\
+Indic-BERT & 0.9649 & 0.9633 & 0.9355 &  \textbf{0.9929} \\
 \bottomrule
 \end{tabular}}
 \caption{Model performance comparison on test set (3,020 samples from 15,099 total,\\ 80/20 stratified split). Best results in bold.}

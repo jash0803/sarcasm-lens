@@ -25,12 +25,13 @@
 \maketitle
 
 \begin{abstract}
+\sloppy
 This paper presents SarcasmLens, a comprehensive system for detecting sarcasm in Hindi-English code-mixed social media text. We combine multiple datasets to create a corpus of 15,099 samples and systematically compare traditional machine learning (TF-IDF + Random Forest/SVM), embedding-based (FastText + Random Forest/SVM), deep learning (BiLSTM), and transformer-based approaches (XLM-RoBERTa, mBERT, Indic-BERT). Our best model, FastText + Random Forest, achieves 97.72\% accuracy and 97.71\% F1 score, demonstrating the effectiveness of subword-aware embeddings for code-mixed sarcasm detection. Transformer models achieve competitive performance, with XLM-RoBERTa-base reaching 96.69\% accuracy and 96.52\% F1 score.
 \end{abstract}
 
 \section{Introduction}
 
-Sarcasm detection in code-mixed social media text presents unique challenges in natural language processing. Indian social media users frequently engage in code-mixing—seamlessly blending Hindi and English within single utterances. Sarcasm in such environments emerges through subtle linguistic cues, cultural references, exaggeration, and context-dependent meaning shifts that traditional monolingual systems fail to capture.
+Sarcasm detection in code-mixed social media text presents unique challenges in natural language processing. Indian social media users frequently engage in code-mixing, seamlessly blending Hindi and English within single utterances. Sarcasm in such environments emerges through subtle linguistic cues, cultural references, exaggeration, and context-dependent meaning shifts that traditional monolingual systems fail to capture.
 
 The core challenge is creating an automated system that accurately identifies sarcastic expressions in code-mixed text while distinguishing them from literal statements. This requires understanding not only surface-level text but also underlying subjectivity, cultural context, and linguistic patterns signaling sarcasm in multilingual, informal communication.
 
@@ -121,7 +122,7 @@ We implement a 7-step preprocessing pipeline specifically designed for code-mixe
 
 \item \textbf{Hashtag processing}: Identifies hashtags and splits camelCase words. Example: \#ILoveIndia $\rightarrow$ ``I Love India''. This preserves semantic content that would be lost if hashtags were simply removed, as hashtags often contain sarcastic markers.
 
-\item \textbf{URL removal}: Removes HTTP/HTTPS URLs and www links using regex patterns. URLs typically don't contribute to sarcasm detection and can introduce noise.
+\item \textbf{URL removal}: Removes HTTP/HTTPS URLs and www links\\ using regex patterns. URLs typically don't contribute to sarcasm detection\\ and can introduce noise.
 
 \item \textbf{Punctuation removal}: Removes all punctuation marks. \textbf{Design trade-off}: While punctuation can sometimes signal sarcasm (e.g., excessive exclamation marks), removing it simplifies the feature space and reduces vocabulary size, allowing models to focus on lexical and semantic patterns.
 
@@ -150,7 +151,7 @@ Our pipeline follows four phases: (1) Data collection and preparation, (2) Featu
 
 \textbf{Phase 1 - Data Collection and Preparation}:
 \begin{itemize}
-\item Collect raw datasets from four sources (Swami, HackArena, Mendeley, Aggarwal)
+\item Collect raw datasets from four sources\\ (Swami, HackArena, Mendeley, Aggarwal)
 \item Convert various formats (TXT, CSV) to unified CSV structure
 \item Normalize labels (YES/NO, sentiment labels $\rightarrow$ binary 0/1)
 \item Apply preprocessing pipeline to each dataset
@@ -184,7 +185,7 @@ We employ four distinct feature extraction methods, each optimized for different
 \textbf{TF-IDF Vectorization}: 
 \begin{itemize}
 \item \textbf{Parameters}: max\_features=5000, ngram\_range=(1,2), min\_df=2,\\ max\_df=0.95, stop\_words=None
-\item \textbf{Rationale}: max\_features limits vocabulary to most frequent terms, balancing coverage and efficiency. ngram\_range captures both unigrams and bigrams, important for sarcasm (e.g., "sure thing", "obviously great"). stop\_words=None preserves sarcastic markers like "really" and "sure".
+\item \textbf{Rationale}: max\_features limits vocabulary to most frequent terms,\\ balancing coverage and efficiency. ngram\_range captures both unigrams and bigrams,\\ important for sarcasm (e.g., ``sure thing'', ``obviously great'').\\ stop\_words=None preserves sarcastic markers like ``really'' and ``sure''.
 \item \textbf{Output}: Sparse matrix (n\_samples $\times$ 5000 features)
 \item \textbf{Use case}: Traditional ML models (Random Forest, SVM)
 \end{itemize}
@@ -213,7 +214,7 @@ FastText uses skip-gram with character n-grams, making it particularly suitable 
 
 Where the probability is computed using:
 \begin{equation}
-P(w_O | w_I) = \frac{\exp(v'_{w_O}^T v_{w_I})}{\sum_{w=1}^{W} \exp(v'_w^T v_{w_I})}
+P(w_O | w_I) = \frac{\exp({v'_{w_O}}^T v_{w_I})}{\sum_{w=1}^{W} \exp({v'_w}^T v_{w_I})}
 \end{equation}
 
 \textbf{Character n-grams}: Each word is represented as a bag of character n-grams. This enables handling of OOV words through subword information, capturing morphological variations (crucial for transliterated Hindi), and better representation of informal spellings common in social media.
@@ -222,7 +223,7 @@ P(w_O | w_I) = \frac{\exp(v'_{w_O}^T v_{w_I})}{\sum_{w=1}^{W} \exp(v'_w^T v_{w_I
 \begin{itemize}
 \item \textbf{Tokenizer}: Keras Tokenizer with vocab\_size=20000,\\ OOV token for unknown words
 \item \textbf{Sequence length}: Determined adaptively using 95th percentile\\ of training sequence lengths
-\item \textbf{Padding/Truncation}: 'post' padding and truncation\\ to fixed max\_len
+\item \textbf{Padding/Truncation}: `post' padding and truncation\\ to fixed max\_len
 \item \textbf{Output}: Padded integer sequences (n\_samples $\times$ max\_len)
 \item \textbf{Use case}: Deep learning models (BiLSTM)
 \end{itemize}
@@ -239,8 +240,8 @@ P(w_O | w_I) = \frac{\exp(v'_{w_O}^T v_{w_I})}{\sum_{w=1}^{W} \exp(v'_w^T v_{w_I
 
 \textbf{Traditional ML with TF-IDF}: 
 \begin{itemize}
-\item \textbf{Random Forest}: n\_estimators=100, max\_depth=None, class\_weight='balanced', n\_jobs=-1 (parallel training)
-\item \textbf{Linear SVM}: C=1.0, max\_iter=1000, class\_weight='balanced', dual=False (primal formulation for efficiency)
+\item \textbf{Random Forest}: n\_estimators=100, max\_depth=None,\\ class\_weight=`balanced', n\_jobs=-1 (parallel training)
+\item \textbf{Linear SVM}: C=1.0, max\_iter=1000,\\ class\_weight=`balanced', dual=False (primal formulation for efficiency)
 \item \textbf{Training time}: Fast (minutes on CPU)
 \item \textbf{Interpretability}: High (feature importance available)
 \end{itemize}
@@ -255,7 +256,7 @@ P(w_O | w_I) = \frac{\exp(v'_{w_O}^T v_{w_I})}{\sum_{w=1}^{W} \exp(v'_w^T v_{w_I
 
 \textbf{Deep Learning - BiLSTM}:
 \begin{itemize}
-\item \textbf{Architecture}: Embedding(128) → BiLSTM(64, return\_sequences=True) → GlobalMaxPooling → Dropout(0.5) → Dense(64, ReLU) → Dropout(0.5) → Dense(1, Sigmoid)
+\item \textbf{Architecture}: Embedding(128) → BiLSTM(64, return\_sequences=True) →\\ GlobalMaxPooling → Dropout(0.5) → Dense(64, ReLU) →\\ Dropout(0.5) → Dense(1, Sigmoid)
 \item \textbf{Training}: Adam optimizer (lr=3e-4), binary crossentropy loss, batch\_size=64, epochs=10
 \item \textbf{Regularization}: Early stopping (patience=2, monitor='val\_loss'), dropout (0.5), validation\_split=0.1
 \item \textbf{Training time}: Moderate (hours on CPU)
@@ -293,16 +294,19 @@ Where $Q$ (Query), $K$ (Key), and $V$ (Value) are learned linear transformations
 
 \textbf{Multi-Head Attention}:
 \begin{equation}
-\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)W^O \nonumber
+\begin{split}
+\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)W^O
+\end{split}
+\nonumber
 \end{equation}
 
 where $\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$ and $h$ is the number of attention heads.
 
 \textbf{Model Selection Rationale}:
 \begin{itemize}
-\item \textbf{XLM-RoBERTa}: Strong multilingual performance, trained on 100 languages,\\ 12 layers, 768 hidden size, 12 attention heads
-\item \textbf{mBERT (bert-base-multilingual-cased)}: Specifically designed for multilingual tasks,\\ trained on 104 languages including Hindi, similar architecture to XLM-RoBERTa
-\item \textbf{Indic-BERT}: Optimized for Indian languages, better understanding of\\ Hindi-English code-mixing patterns, trained specifically on Indic language corpora
+\item \textbf{XLM-RoBERTa}: Strong multilingual performance,\\ trained on 100 languages, 12 layers, 768 hidden size, 12 attention heads
+\item \textbf{mBERT (bert-base-multilingual-cased)}: Specifically designed for multilingual tasks,\\ trained on 104 languages including Hindi,\\ similar architecture to XLM-RoBERTa
+\item \textbf{Indic-BERT}: Optimized for Indian languages,\\ better understanding of Hindi-English code-mixing patterns,\\ trained specifically on Indic language corpora
 \end{itemize}
 
 \section{Evaluation Setup}
@@ -387,9 +391,9 @@ Indic-BERT & 0.9649 & 0.9633 & 0.9355 &  \textbf{0.9929} \\
 \begin{itemize}
 \item All models achieve >94\% accuracy, indicating the task is learnable with appropriate feature representations
 \item FastText + Random Forest achieves highest performance (97.72\% accuracy, 97.71\% F1)
-\item FastText embeddings provide consistent improvement over TF-IDF when combined with Random Forest
-\item Random Forest consistently outperforms SVM, indicating non-linear\\ decision boundaries are important
-\item BiLSTM achieves competitive performance (97.05\%) but slightly lower than best traditional ML approach
+\item FastText embeddings provide consistent improvement over TF-IDF\\ when combined with Random Forest
+\item Random Forest consistently outperforms SVM,\\ indicating non-linear decision boundaries are important
+\item BiLSTM achieves competitive performance (97.05\%) but slightly lower\\ than best traditional ML approach
 \item Transformer models achieve strong performance: XLM-RoBERTa-base (96.69\% accuracy, 96.52\% F1), Indic-BERT (96.49\% accuracy, 96.33\% F1), and mBERT (96.09\% accuracy, 95.87\% F1)
 \item All transformer models show high recall (>97\%), indicating excellent ability to identify sarcastic examples
 \end{itemize}
@@ -402,7 +406,7 @@ Indic-BERT & 0.9649 & 0.9633 & 0.9355 &  \textbf{0.9929} \\
 
 \textbf{Classifier Comparison}: Random Forest consistently outperforms SVM for both TF-IDF (97.55\% vs 97.62\%) and FastText (97.72\% vs 94.93\%) features, indicating non-linear decision boundaries are important.
 
-\textbf{Deep Learning Performance}: BiLSTM achieves 97.05\% accuracy, competitive but slightly lower than best traditional ML approach, possibly due to limited training data or architecture choices.
+\textbf{Deep Learning Performance}: BiLSTM achieves 97.05\% accuracy,\\ competitive but slightly lower than best traditional ML approach,\\ possibly due to limited training data or architecture choices.
 
 \textbf{Transformer Results}: All three transformer models were successfully fine-tuned and evaluated. XLM-RoBERTa-base achieves the best transformer performance (96.69\% accuracy, 96.52\% F1), followed by Indic-BERT (96.49\% accuracy, 96.33\% F1) and mBERT (96.09\% accuracy, 95.87\% F1). Notably, all transformer models demonstrate exceptional recall (>97\%), with Indic-BERT achieving the highest recall (99.29\%), indicating strong ability to identify sarcastic examples while maintaining high precision (>93\%).
 
@@ -442,9 +446,9 @@ While detailed error analysis is part of future work, initial observations sugge
 \textbf{Computational Efficiency}:
 \begin{itemize}
 \item \textbf{TF-IDF + Random Forest}: Fastest training ($\sim$minutes),\\ moderate inference time
-\item \textbf{FastText + Random Forest}: Moderate training (includes FastText training), fast inference
+\item \textbf{FastText + Random Forest}: Moderate training\\ (includes FastText training), fast inference
 \item \textbf{BiLSTM}: Moderate training ($\sim$hours on CPU),\\ moderate inference time
-\item \textbf{Transformers}: Slowest training (hours to days on CPU), moderate inference time
+\item \textbf{Transformers}: Slowest training (hours to days on CPU),\\ moderate inference time
 \end{itemize}
 
 The best model (FastText + Random Forest) provides an excellent balance of performance and efficiency, making it suitable for real-world deployment.
@@ -456,20 +460,19 @@ We present SarcasmLens, a comprehensive system for sarcasm detection in Hindi-En
 \textbf{Key Contributions}:
 \begin{itemize}
 \item Unified corpus combining multiple code-mixed sarcasm datasets
-\item Systematic comparison of traditional ML, embedding-based, deep learning, and transformer approaches
-\item Demonstration that subword-aware embeddings (FastText) outperform traditional features (TF-IDF) for code-mixed text
+\item Systematic comparison of traditional ML, embedding-based,\\ deep learning, and transformer approaches
+\item Demonstration that subword-aware embeddings (FastText)\\ outperform traditional features (TF-IDF) for code-mixed text
 \item Best model identification with detailed analysis of design choices
 \end{itemize}
 
 \textbf{Future Work}:
 \begin{itemize}
 \item \textbf{Error Analysis}: Systematic analysis of failure cases to identify patterns and improve models
-\item \textbf{Cross-Dataset Generalization}: Evaluate model performance on held-out datasets to assess robustness
 \item \textbf{Feature Engineering}: Explore additional features (punctuation patterns, emoji usage, language switching frequency)
 \item \textbf{Model Interpretability}: Use techniques like LIME/SHAP to understand model decisions
-\item \textbf{Real-World Deployment}: Deploy best model in production environment and evaluate on live social media data
-\item \textbf{Extension to Other Languages}: Apply methodology to other code-mixed language pairs (e.g., Marathi-English, Tamil-English)
-\item \textbf{Multi-modal Approaches}: Incorporate visual and audio cues when available
+\item \textbf{Real-World Deployment}: Deploy best model in production environment\\ and evaluate on live social media data
+\item \textbf{Extension to Other Languages}: Apply methodology to other\\ code-mixed language pairs (e.g., Marathi-English, Tamil-English)
+\item \textbf{Multi-modal Approaches}: Incorporate visual and audio cues\\ when available
 \item \textbf{Active Learning}: Improve annotation efficiency through active learning strategies
 \end{itemize}
 
@@ -478,14 +481,13 @@ Our work establishes strong baselines for code-mixed sarcasm detection and provi
 \section*{References}
 
 \begin{enumerate}
-\item Swami, S., Khandelwal, A., Singh, V., Akhtar, S. S., \& Shrivastava, M. (2018). A Corpus of English-Hindi Code-Mixed Tweets for Sarcasm Detection. \textit{arXiv preprint arXiv:1805.11869}.
+\item Swami, S., Khandelwal, A., Singh, V., Akhtar, S. S., \& Shrivastava, M. (2018).\\ A Corpus of English-Hindi Code-Mixed Tweets for Sarcasm Detection.\\ \textit{arXiv preprint arXiv:1805.11869}.
 
 \item Aggarwal, A., Wadhawan, A., Chaudhary, A., \& Maurya, K. (2020). ``Did you really mean what you said?'': Sarcasm Detection in Hindi-English Code-Mixed Data using Bilingual Word Embeddings. \textit{arXiv preprint arXiv:2010.00310}.
 
 \item Bedi, M., Kumar, S., Akhtar, M. S., \& Chakraborty, T. (2021). Multi-modal Sarcasm Detection and Humor Classification in Code-mixed Conversations. \textit{arXiv preprint arXiv:2105.09984}.
 
-\item HackArena Theme 2 -- Multilingual Sarcasm Detection. Kaggle Dataset.\\
-\url{https://www.kaggle.com/datasets/divyanshu134/hackarena-theme-2-multilingual-sarcasm-detection/data}
+\item HackArena Theme 2: Multilingual Sarcasm Detection.\\ Kaggle Dataset. \url{https://www.kaggle.com/datasets/divyanshu134/hackarena-theme-2-multilingual-sarcasm-detection/data}
 \end{enumerate}
 
 \end{document}

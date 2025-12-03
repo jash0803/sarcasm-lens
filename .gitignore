@@ -1,6 +1,7 @@
 # API responses and datasets
 api_responses/
 datasets/
+transformer_runs/
 
 # Model files
 *.bin

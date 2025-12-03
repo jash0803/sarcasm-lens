@@ -17,15 +17,18 @@ under noisy, informal text conditions.
 
 The following table compares the performance of different models trained on the combined dataset:
 
-| Model | Accuracy | F1 Score |
-|-------|----------|----------|
-| TF-IDF + Random Forest | 0.9755 | 0.9755 |
-| TF-IDF + SVM | 0.9762 | 0.9762 |
-| FastText + Random Forest | **0.9772** | **0.9771** |
-| FastText + SVM | 0.9493 | 0.9492 |
-| BiLSTM (FastText) | 0.9705 | 0.9705 |
+| Model | Accuracy | F1 Score | Precision | Recall |
+|-------|----------|----------|-----------|--------|
+| TF-IDF + Random Forest | 0.9755 | 0.9755 | - | - |
+| TF-IDF + SVM | 0.9762 | 0.9762 | - | - |
+| FastText + Random Forest | **0.9772** | **0.9771** | - | - |
+| FastText + SVM | 0.9493 | 0.9492 | - | - |
+| BiLSTM | 0.9705 | 0.9705 | - | - |
+| XLM-RoBERTa-base | 0.9669 | 0.9652 | 0.9429 | 0.9886 |
+| mBERT | 0.9609 | 0.9587 | 0.9421 | 0.9757 |
+| Indic-BERT | 0.9649 | 0.9633 | 0.9355 | 0.9929 |
 
-The FastText + Random Forest model achieved the best performance with an accuracy of 97.72% and F1 score of 97.71%.
+The FastText + Random Forest model achieved the best performance with an accuracy of 97.72% and F1 score of 97.71%. Among transformer models, XLM-RoBERTa-base achieved the highest accuracy (96.69%) and F1 score (96.52%).
 
 ## Installation
 

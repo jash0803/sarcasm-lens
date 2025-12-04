@@ -20,6 +20,24 @@ except LookupError:
 # Get English stop words
 STOP_WORDS = set(stopwords.words('english'))
 
+
+def collapse_repeated_chars(word: str) -> str:
+    """
+    Collapse character repetitions in a token.
+
+    Example:
+        "kiyaa", "kiyaaa" -> "kiyaa" (aaa -> aa)
+        "soooo" -> "sooo" (oooo -> ooo)
+
+    The core heuristic is to limit runs of the same character to at most 2:
+        re.sub(r'(.)\\1{2,}', r'\\1\\1', word)
+    """
+    if not word:
+        return word
+
+    # Limit any run of 3+ of the same character down to 2
+    return re.sub(r'(.)\\1{2,}', r'\\1\\1', word)
+
 def split_camel_case(text):
     """Split camelCase hashtags into separate words.
     Example: #ILoveIndia -> I Love India
@@ -29,7 +47,7 @@ def split_camel_case(text):
     return text
 
 def preprocess_text(text):
-    """Preprocess text by removing @ mentions and splitting camelCase hashtags."""
+    """Preprocess text by removing @ mentions, normalizing repetitions, and splitting camelCase hashtags."""
     if pd.isna(text):
         return ""
     
@@ -53,9 +71,12 @@ def preprocess_text(text):
     
     # Remove punctuation
     text = text.translate(str.maketrans('', '', string.punctuation))
-    
-    # Remove stop words
+
+    # Collapse repeated characters in each token
     words = text.split()
+    words = [collapse_repeated_chars(word) for word in words]
+
+    # Remove stop words
     words = [word for word in words if word.lower() not in STOP_WORDS]
     text = ' '.join(words)
     
